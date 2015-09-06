@@ -23,7 +23,7 @@ class bcolors:
 timetowait = int(sys.argv[1])
 cacheoffset = int(sys.argv[2])
 notifyonruns = int(sys.argv[3])
-123456789
+
 ## enter the corresponding information from your Twitter application:
 CONSUMER_KEY = '123456789'#keep the quotes, replace this with your consumer key
 CONSUMER_SECRET = '123456789'#keep the quotes, replace this with your consumer secret key
