@@ -115,7 +115,7 @@ def mainloop(dbconfig, waitTime):
                                "WHERE id = %d " % (id))
 
                     ## send the tweet
-                    #sendtweet(tweetcontent)
+                    sendtweet(tweetcontent)
 
                     ## run the update query and commit to the databse
                     cursor.execute(updateQuery)
