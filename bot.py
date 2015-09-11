@@ -1,28 +1,29 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Scheduled Tweet Bot written in Python intended to run on a Raspberry Pi
-# (will work anywhere Python and the dependancies are installed though)
-# version: 0.9
-import tweepy, time, sys
+# bot.py
+# description: This is the entry script for a Twitter Bot
+# copyrigtht: 2015 William Patton - PattonWebz
+# licence: GPLv3
+# @package: PWTwitterBot
+
+import tweepy, time, sys, datetime, argparse
+# the below imports are imporing other files from this package
 import dbconnect
-import datetime
+import twitterfunctions
+import colors
 
-## set some colors to use in the command line, borrowed from blender build script
-## found in this answere here: http://stackoverflow.com/a/287944/2375493
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+parser = argparse.ArgumentParser()
+parser.add_argument("--timetowait", help="time in seconds between how long to wait between loops", default="60", type=int )
+parser.add_argument("--cacheoffset", help="time in seconds between mysql connections", default="300", type=int )
+parser.add_argument("--notifyonruns", help="issue a message after x runs to show program is still active", default="60", type=int )
 
-## grab the first paramiter passed, we use this as a time for the loop
-timetowait = int(sys.argv[1])
-cacheoffset = int(sys.argv[2])
-notifyonruns = int(sys.argv[3])
+args = parser.parse_args()
+
+# grab the first paramiter passed, we use this as a time for the loop
+# TODO: We shuold parse these paramiters better using some kind of
+#       library made for doing so.
+TIMETOWAIT = args.timetowait
+CACHEOFFSET = args.cacheoffset
+NOTIFYONRNS = args.notifyonruns
 
 ## enter the corresponding information from your Twitter application:
 CONSUMER_KEY = '123456789'#keep the quotes, replace this with your consumer key
@@ -33,7 +34,7 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
 
-## enter database connection information
+# enter database connection information
 dbconfig = {
   'user': 'bot-twitter',
   'password': 'SomeSecurePassword',
@@ -42,9 +43,9 @@ dbconfig = {
   'raise_on_warnings': True,
 }
 
-## this is the main function of the program
-## accepts a databse configuiration and a time to wait between loops
-def mainloop(dbconfig, waitTime):
+# this is the main function of the program
+# accepts a databse configuiration and a time to wait between loops
+def runner(dbconfig, waitTime):
 
     ## create counter variables
     i = 0
@@ -56,8 +57,12 @@ def mainloop(dbconfig, waitTime):
     ## the same - we're not working with millisecond accuracy globally
     cachetill = datetime.datetime.now() - datetime.timedelta(seconds=5)
 
-    print('Starting program...')
-    print("Paramiters used: loop sleep - %d seconds, connection cache offset - %d seconds , notify every - %d runs" % (waitTime, cacheoffset, notifyonruns))
+    ## get an api object and asign it to a variable
+
+    authenticated_api = twitterfunctions.authenticatetwitter(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+
+    print colors.tcolors.BOLD + colors.tcolors.HEADER + "Starting program..." + colors.tcolors.ENDC + colors.tcolors.ENDC
+    print("Paramiters used: loop sleep - %s seconds, connection cache offset - %s seconds , notify every - %s runs" % (colors.tcolors.GREEN + str(waitTime) + colors.tcolors.ENDC, colors.tcolors.GREEN + str(CACHEOFFSET) + colors.tcolors.ENDC, colors.tcolors.GREEN + str(NOTIFYONRNS) + colors.tcolors.ENDC))
 
     ## Infinate loop
     while True:
@@ -65,8 +70,8 @@ def mainloop(dbconfig, waitTime):
         ## increment loop counter
         i += 1
         j += 1
-        if j / notifyonruns == 1:
-            print bcolors.BOLD + "Iteration number: %d" % (i) + bcolors.ENDC
+        if j / NOTIFYONRNS == 1:
+            print colors.tcolors.BOLD + "Iteration number: %d" % (i) + colors.tcolors.ENDC
             j = 0
 
         ## rather than connect to the database each and every time we'll do
@@ -77,11 +82,11 @@ def mainloop(dbconfig, waitTime):
 
         if cachetill < timenow:
 
-            print( bcolors.OKBLUE + 'making new connection at %s' % (timenow) + bcolors.ENDC)
+            print( colors.tcolors.BLUE + 'making new connection at %s' % (timenow) + colors.tcolors.ENDC)
 
             ## set next cachetime to time now + the cache offset specified as
             ## arg2 when starting the program
-            cachetill = datetime.datetime.now() + datetime.timedelta(seconds=cacheoffset)
+            cachetill = datetime.datetime.now() + datetime.timedelta(seconds=CACHEOFFSET)
 
             ## connect to the database and set a cursor point
             cnx = dbconnect.dbconnect(dbconfig)
@@ -106,16 +111,17 @@ def mainloop(dbconfig, waitTime):
                 timestamp = datetime.datetime.now()
                 ## compair current time agains timetosend from the entry
                 if timestamp > timetosend :
+                    ## if current time is after scheduled time to send
+                    print( colors.tcolors.BOLD + colors.tcolors.HEADER + 'will be sending now' + colors.tcolors.ENDC + colors.tcolors.ENDC)
 
-                    print( bcolors.BOLD + bcolors.HEADER + 'will be sending now' + bcolors.ENDC + bcolors.ENDC)
                     ## set a query to set this entry sent value to 1
                     updateQuery = ("UPDATE ScheduledTweets "
                                "SET sent = '1', "
                                "timesent = NULL "
-                               "WHERE id = %d " % (id))
+                               "WHERE id = %d" % (id))
 
                     ## send the tweet
-                    sendtweet(tweetcontent)
+                    twitterfunctions.sendtweet(authenticated_api, tweetcontent)
 
                     ## run the update query and commit to the databse
                     cursor.execute(updateQuery)
@@ -123,10 +129,10 @@ def mainloop(dbconfig, waitTime):
 
                     ## create an INSERT query to copy current tweet to a second
                     ## table for SentTweets
-                    insertQuery = ("INSERT INTO SentTweets "
-                         "(tweetcontent, timetosend, sent, oldid) "
-                         "VALUES "
-                         "('%s', '%s', '1', %d)" % (tweetcontent, timetosend, id))
+                    insertQuery = ('INSERT INTO SentTweets '
+                         '(tweetcontent, timetosend, sent, oldid) '
+                         'VALUES '
+                         '("%s", "%s", "1", %d)' % (tweetcontent, timetosend, id))
 
                     ## execute the query and commit to the database
                     cursor.execute(insertQuery)
@@ -142,9 +148,11 @@ def mainloop(dbconfig, waitTime):
 
         time.sleep(waitTime)
 
-def sendtweet(tweet):
-    api.update_status(tweet)
+def main():
+    # this is the main function for the program.
 
-# this is where the program actually starts from
-# pass database configuration and a time to wait between loop iterations
-mainloop(dbconfig, timetowait)
+    # pass a dbconfig and a loop time to the main runner
+    runner(dbconfig, TIMETOWAIT)
+
+if  __name__ =='__main__':
+    main()
