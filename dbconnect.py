@@ -10,17 +10,23 @@ import mysql.connector
 from mysql.connector import errorcode
 
 def dbconnect(config):
-
+  # note: returning cnx effectively closes the connection
   try:
-	cnx = mysql.connector.connect(**config)
+    cnx = mysql.connector.connect(**config)
 
   except mysql.connector.Error as err:
-	if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-	  print("Something is wrong with your user name or password")
-	elif err.errno == errorcode.ER_BAD_DB_ERROR:
-	  print("Database does not exist")
-	else:
-	  print(err)
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+      print("Something is wrong with your user name or password")
+    elif err.errno == errorcode.ER_BAD_DB_ERROR:
+      print("Database does not exist")
+    else:
+      print(err)
 
   else:
-        return cursor
+    return cnx
+
+def dbcursor(cnx):
+
+  cursor = cnx.cursor()
+  return cursor
+

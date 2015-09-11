@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--timetowait", help="time in seconds between how long to wait between loops", default="60", type=int )
 parser.add_argument("--cacheoffset", help="time in seconds between mysql connections", default="300", type=int )
 parser.add_argument("--notifyonruns", help="issue a message after x runs to show program is still active", default="60", type=int )
+parser.add_argument("--user", help="user credentials to use", default="default", type=str )
 
 args = parser.parse_args()
 
@@ -25,15 +26,6 @@ TIMETOWAIT = args.timetowait
 CACHEOFFSET = args.cacheoffset
 NOTIFYONRNS = args.notifyonruns
 
-## enter the corresponding information from your Twitter application:
-CONSUMER_KEY = '123456789'#keep the quotes, replace this with your consumer key
-CONSUMER_SECRET = '123456789'#keep the quotes, replace this with your consumer secret key
-ACCESS_KEY = '123456789'#keep the quotes, replace this with your access token
-ACCESS_SECRET = '123456789'#keep the quotes, replace this with your access token secret
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-api = tweepy.API(auth)
-
 # enter database connection information
 dbconfig = {
   'user': 'bot-twitter',
@@ -42,6 +34,24 @@ dbconfig = {
   'database': 'twitterbot',
   'raise_on_warnings': True,
 }
+
+authcnx = dbconnect.dbconnect(dbconfig)
+authcursor = dbconnect.dbcursor(authcnx)
+
+getKeySecretQuery = ("SELECT CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET FROM Accounts WHERE user = %r" % (args.user))
+
+gotKeySecretResult = authcursor.execute(getKeySecretQuery)
+
+KeySecretResult = authcursor.fetchall()
+
+for (CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET) in KeySecretResult :
+
+    THE_CONSUMER_KEY = CONSUMER_KEY
+    THE_CONSUMER_SECRET = CONSUMER_SECRET
+    THE_ACCESS_KEY = ACCESS_KEY
+    THE_ACCESS_SECRET = ACCESS_SECRET
+
+api = twitterfunctions.authenticatetwitter(THE_CONSUMER_KEY, THE_CONSUMER_SECRET, THE_ACCESS_KEY, THE_ACCESS_SECRET)
 
 # this is the main function of the program
 # accepts a databse configuiration and a time to wait between loops
