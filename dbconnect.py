@@ -1,18 +1,16 @@
+#!/usr/bin/env python
+# dbconnect.py
+# description: A simple MySQL database connection module
+# copyrigtht: 2015 William Patton - PattonWebz
+# licence: GPLv3
+# @package: PWTwitterBot
+# @subpackage: DBConnect
+
 import mysql.connector
 from mysql.connector import errorcode
 
-config = {
-  'user': 'bot-twitter',
-  'password': 'SomeSecurePassword',
-  'host': '127.0.0.1',
-  'database': 'twitterbot',
-  'raise_on_warnings': True,
-  'pool_size' : 2
-}
-
 def dbconnect(config):
-
-
+  # note: returning cnx effectively closes the connection
   try:
     cnx = mysql.connector.connect(**config)
 
@@ -27,12 +25,8 @@ def dbconnect(config):
   else:
     return cnx
 
-def dbclose(cnx):
-  cnx.close()
-
 def dbcursor(cnx):
+
   cursor = cnx.cursor()
   return cursor
 
-def dbcursorclose(cursor):
-  cursor.close()
