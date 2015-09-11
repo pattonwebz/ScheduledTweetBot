@@ -4,9 +4,10 @@ A Scheduled Tweet bot written in Python to run on a Raspberry Pi (runs anywhere 
 ## Usage
 Running is simple: run the script passing 3 arguments
 
-# Time between send loops - this will dictate responsiveness of the bot.
-# A time between new connections to the database - this will reduce reads to the FS with a higher value but may not discover new tweets that are added between (connection cache offset + time between loops).
-# An amount of times to run before outputing a notice it's still running - Once I was sure it was working I wanted to see less notifications on screen.
+=======
+1. Time between send loops - this will dictate responsiveness of the bot.
+2. A time between new connections to the database - this will reduce reads to the FS with a higher value but may not discover new tweets that are added between (connection cache offset + time between loops).
+3. An amount of times to run before outputing a notice it's still running - Once I was sure it was working I wanted to see less notifications on screen.
 
 ```
 python bot.py 60 300 15
