@@ -18,6 +18,7 @@ The above command runs the bot, loops it every 60 seconds, makes fresh database 
 ##Setup
 Edit the `bot.py` file and enter your database and Twitter credentials. It uses a database structure like with 2 tables - ScheduledTweets and SentTweets
 
+```
 CREATE TABLE SentTweets (
     id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     tweetcontent VARCHAR(140) NOT NULL,
@@ -26,7 +27,9 @@ CREATE TABLE SentTweets (
     sent TINYINT(1) NOT NULL DEFAULT='0'
     timesent TIMESTAMP
 );
+```
 
+```
 CREATE TABLE ScheduledTweets (
     id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     tweetcontent VARCHAR(140) NOT NULL,
@@ -34,7 +37,7 @@ CREATE TABLE ScheduledTweets (
     sent TINYINT(1) NOT NULL,
     timesent TIMESTAMP
 );
-
+```
 ### Credits
 Uses the 'Tweepy' library for all Twitter API actions. http://github.com/tweepy/tweepy
 
