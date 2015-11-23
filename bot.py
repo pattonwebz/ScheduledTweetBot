@@ -11,6 +11,8 @@ import dbconnect
 import twitterfunctions
 import colors
 
+from configuration import dbconfig
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--timetowait", help="time in seconds between how long to wait between loops", default="60", type=int )
 parser.add_argument("--cacheoffset", help="time in seconds between mysql connections", default="300", type=int )
@@ -22,15 +24,6 @@ args = parser.parse_args()
 TIMETOWAIT = args.timetowait
 CACHEOFFSET = args.cacheoffset
 NOTIFYONRNS = args.notifyonruns
-
-# enter database connection information
-dbconfig = {
-  'user': 'bot-twitter',
-  'password': 'SomeSecurePassword',
-  'host': '127.0.0.1',
-  'database': 'twitterbot',
-  'raise_on_warnings': True,
-}
 
 authcnx = dbconnect.dbconnect(dbconfig)
 authcursor = dbconnect.dbcursor(authcnx)
