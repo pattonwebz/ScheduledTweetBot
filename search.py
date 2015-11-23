@@ -15,6 +15,9 @@ dbconfig = {
   'raise_on_warnings': True,
 }
 
+authcnx = dbconnect.dbconnect(dbconfig)
+authcursor = dbconnect.dbcursor(authcnx)
+
 getKeySecretQuery = ("SELECT CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET FROM Accounts WHERE user = 'default'")
 gotKeySecretResult = authcursor.execute(getKeySecretQuery)
 KeySecretResult = authcursor.fetchall()
