@@ -5,6 +5,7 @@
 # version: 0.9
 import tweepy, sys
 import dbconnect
+import twitterfunctions
 
 ## enter database connection information
 dbconfig = {
