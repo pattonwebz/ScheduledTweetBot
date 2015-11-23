@@ -6,20 +6,13 @@
 import tweepy, sys
 import dbconnect
 import twitterfunctions
-
-## enter database connection information
-dbconfig = {
-  'user': 'bot-twitter',
-  'password': 'someSecurePassword',
-  'host': '127.0.0.1',
-  'database': 'twitterbot',
-  'raise_on_warnings': True,
-}
-
-authcnx = dbconnect.dbconnect(dbconfig)
-authcursor = dbconnect.dbcursor(authcnx)
+from configuration import dbconfig
 
 getKeySecretQuery = ("SELECT CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET FROM Accounts WHERE user = 'default'")
+
+authcnx=dbconnect.dbconnect(dbconfig)
+authcursor=dbconnect.dbcursor(authcnx)
+
 gotKeySecretResult = authcursor.execute(getKeySecretQuery)
 KeySecretResult = authcursor.fetchall()
 
@@ -28,6 +21,7 @@ for (CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET) in KeySecretResul
     THE_CONSUMER_SECRET = CONSUMER_SECRET
     THE_ACCESS_KEY = ACCESS_KEY
     THE_ACCESS_SECRET = ACCESS_SECRET
+
 api = twitterfunctions.authenticatetwitter(THE_CONSUMER_KEY, THE_CONSUMER_SECRET, THE_ACCESS_KEY, THE_ACCESS_SECRET)
 
 
