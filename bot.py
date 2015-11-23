@@ -19,9 +19,6 @@ parser.add_argument("--user", help="user credentials to use", default="default",
 
 args = parser.parse_args()
 
-# grab the first paramiter passed, we use this as a time for the loop
-# TODO: We shuold parse these paramiters better using some kind of
-#       library made for doing so.
 TIMETOWAIT = args.timetowait
 CACHEOFFSET = args.cacheoffset
 NOTIFYONRNS = args.notifyonruns
