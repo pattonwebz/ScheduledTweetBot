@@ -56,7 +56,7 @@ def tweetValidate(tweet_text, tweet_type):
     MAXTCOLENGTH = 20
     charCount = len(tweet_text)
 
-    if ( tweet_type == 'retweet' and charCount > 16 ) :
+    if ( tweet_type == 'retweet' and charCount > 18 ) :
         print ("error with retweet length")
 
     if charCount > 140 :

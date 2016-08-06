@@ -93,7 +93,7 @@ def runner(dbconfig, waitTime):
             cursor = dbconnect.dbcursor(cnx)
 
         ## query for ScheduledTweets that are not sent yet
-        selectQuery = ("SELECT id, tweetcontent, timetosend, sent FROM ScheduledTweets WHERE sent = 0")
+        selectQuery = ("SELECT id, tweetcontent, timetosend, sent, tweettype FROM ScheduledTweets WHERE sent = 0")
 
         ## execute the query and return the result to an array
         cursor.execute(selectQuery)
@@ -101,7 +101,7 @@ def runner(dbconfig, waitTime):
 
 
         ## loop through the results
-        for (id, tweetcontent, timetosend, send) in selectResult:
+        for (id, tweetcontent, timetosend, send, tweettype) in selectResult:
             ## if not sent yet
             if send == 0:
 
@@ -120,8 +120,11 @@ def runner(dbconfig, waitTime):
                                "timesent = NULL "
                                "WHERE id = %d" % (id))
 
-                    ## send the tweet
-                    twitterfunctions.sendtweet(authenticated_api, tweetcontent)
+                    ## send the tweet or retweet
+                    if tweettype == 'retweet' :
+                        twitter.functions.sendretweet(authenticated_api, tweetcontent)
+                    elif tweettype == 'tweet' :
+                        twitterfunctions.sendtweet(authenticated_api, tweetcontent)
 
                     ## run the update query and commit to the databse
                     cursor.execute(updateQuery)

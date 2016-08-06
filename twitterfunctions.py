@@ -25,3 +25,7 @@ def authenticatetwitter(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
 def sendtweet(api, tweet):
     # Send 'tweet' using Tweepy API function
     api.update_status(status=tweet)
+
+def sendretweet(api, tweet):
+    # Send a retweet - 'tweet' content will be a tweet Id
+    api.retweet(tweet)
