@@ -5,7 +5,8 @@
 # licence: GPLv3
 # @package: PWTwitterBot
 
-import tweepy, time, sys, datetime, argparse
+import tweepy, time, sys, datetime
+from daemon import runner
 # the below imports are imporing other files from this package
 import dbconnect
 import twitterfunctions
@@ -13,22 +14,14 @@ import colors
 
 from configuration import dbconfig
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--timetowait", help="time in seconds between how long to wait between loops", default="60", type=int )
-parser.add_argument("--cacheoffset", help="time in seconds between mysql connections", default="300", type=int )
-parser.add_argument("--notifyonruns", help="issue a message after x runs to show program is still active", default="60", type=int )
-parser.add_argument("--user", help="user credentials to use", default="default", type=str )
-
-args = parser.parse_args()
-
-TIMETOWAIT = args.timetowait
-CACHEOFFSET = args.cacheoffset
-NOTIFYONRNS = args.notifyonruns
+TIMETOWAIT = 60
+CACHEOFFSET = 300
+NOTIFYONRNS = 15
 
 authcnx = dbconnect.dbconnect(dbconfig)
 authcursor = dbconnect.dbcursor(authcnx)
 
-getKeySecretQuery = ("SELECT CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET FROM Accounts WHERE user = %r" % (args.user))
+getKeySecretQuery = "SELECT CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET FROM Accounts WHERE user = 'default'"
 
 gotKeySecretResult = authcursor.execute(getKeySecretQuery)
 
@@ -43,9 +36,21 @@ for (CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET) in KeySecretResul
 
 api = twitterfunctions.authenticatetwitter(THE_CONSUMER_KEY, THE_CONSUMER_SECRET, THE_ACCESS_KEY, THE_ACCESS_SECRET)
 
+
+class APP():
+    def __init__(self):
+        self.stdin_path = '/dev/null'
+        self.stdout_path = '/var/log/twitterbot'
+        self.stderr_path = '/var/log/twitterbot'
+        self.pidfile_path =  '/tmp/twitterbot.pid'
+        self.pidfile_timeout = 30
+    def run(self):
+        # pass a dbconfig and a loop time to the main runner
+        mainrunner(dbconfig, TIMETOWAIT)
+
 # this is the main function of the program
 # accepts a databse configuiration and a time to wait between loops
-def runner(dbconfig, waitTime):
+def mainrunner(dbconfig, waitTime):
 
     ## create counter variables
     i = 0
@@ -151,11 +156,6 @@ def runner(dbconfig, waitTime):
 
         time.sleep(waitTime)
 
-def main():
-    # this is the main function for the program.
-
-    # pass a dbconfig and a loop time to the main runner
-    runner(dbconfig, TIMETOWAIT)
-
-if  __name__ =='__main__':
-    main()
+app = APP()
+daemon_runner = runner.DaemonRunner(app)
+daemon_runner.do_action()
