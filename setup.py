@@ -92,7 +92,7 @@ def main():
     dropTableFunction(cursor, dropQuery_SentTweets)
     cursor.execute(createQuery_SentTweets)
 
-    getDefaultKeys()
+    getDefaultKeys(cursor)
 
     cnx.commit()
 
