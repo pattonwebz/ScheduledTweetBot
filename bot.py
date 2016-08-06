@@ -122,7 +122,7 @@ def runner(dbconfig, waitTime):
 
                     ## send the tweet or retweet
                     if tweettype == 'retweet' :
-                        twitter.functions.sendretweet(authenticated_api, tweetcontent)
+                        twitterfunctions.sendretweet(authenticated_api, tweetcontent)
                     elif tweettype == 'tweet' :
                         twitterfunctions.sendtweet(authenticated_api, tweetcontent)
 
