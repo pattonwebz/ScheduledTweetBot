@@ -8,15 +8,19 @@ The above command runs the bot, loops it every 60 seconds, makes fresh database 
 
 ## Requirements
 
-Requires you install mysql-connector and Tweepy.
+Requires you install mysql-connector and Tweepy. Also now requires python-daemon
 
 Download mysql-connecter from here: https://dev.mysql.com/downloads/connector/python/
 
 If you're using this on a RPi then you'll likely want the architecture independant .deb file.
 
-You can install Tweepy using pip, easy_install or any other method that gets it's pacages from PyPy:
+You can install Tweepy using pip, easy_install or any other method that gets it's packages from Pypi. remember some setups require you run an install with `sudo`.
 
 `pip install tweepy`
+
+Installing python-daemon with:
+
+`pip install python-daemon`
 
 ##Setup
 
